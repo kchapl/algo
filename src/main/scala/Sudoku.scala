@@ -1,47 +1,80 @@
 package algo
 
+import scala.annotation.tailrec
+
 object Sudoku extends App {
 
-  case class Coord(row: Int, col: Int)
-  case class Grid(
-      rows: Array[Array[Int]],
-      filled: Seq[Coord]
-  )
+  sealed trait Cell { def value: Int }
+  case class Given(value: Int) extends Cell
+  case class Deduced(value: Int) extends Cell
+  case object Empty extends Cell { val value = 0 }
 
-  object Grid {
-    def apply(initCells: Array[Array[Int]]): Grid =
-      Grid(initCells, Nil)
+  case class Coord(row: Int, col: Int)
+
+  object Coord {
+
+    def coordsOfNextCellToFill(g: Grid): Option[Coord] = {
+      val row = g.rows.indexWhere(row => row.contains(Empty))
+      if (row == -1) None
+      else {
+        val h = g.rows(row).indexWhere(_ == Empty)
+        Some(Coord(row, h))
+      }
+    }
+
+    def coordsOfLastCellFilled(g: Grid): Option[Coord] = {
+      val row =
+        g.rows.lastIndexWhere(row => row.exists(c => c.isInstanceOf[Deduced]))
+      if (row == -1) None
+      else {
+        val h = g.rows(row).lastIndexWhere(c => c.isInstanceOf[Deduced])
+        Some(Coord(row, h))
+      }
+    }
   }
+
+  case class Grid(rows: Array[Array[Cell]])
 
   def nextCellFilled(g: Grid): Grid = {
-    val coordsOfNextCellToFill = {
-      def f(rowIndex: Int): Int = g.rows(rowIndex).indexWhere(_ == 0)
-      val row = g.rows.indexWhere(row => row.contains(0))
-      val h = f(row)
-      Coord(row, h)
-    }
-    g.rows(coordsOfNextCellToFill.row)(coordsOfNextCellToFill.col) = 1
-    val h = g.copy(filled = g.filled :+ coordsOfNextCellToFill)
-    h
-  }
-
-  def incremented(g: Grid): Grid = {
-    val h = g.filled.last
-    val cellValue = g.rows(h.row)(h.col)
-    if (cellValue == 9) {
-      val j = g.filled(g.filled.length - 2)
-      val c = g.rows(j.row)(j.col)
-      g.rows(j.row)(j.col) = c + 1
-    } else g.rows(h.row)(h.col) = cellValue + 1
+    val c = Coord.coordsOfNextCellToFill(g)
+    c.foreach(d => g.rows(d.row)(d.col) = Deduced(1))
     g
   }
 
-  def rowsValid(g: Grid): Boolean = g.rows.forall { row =>
-    val knownValues = row.filter(_ > 0)
-    knownValues.distinct.length == knownValues.length
+  def incremented(g: Grid): Grid = {
+
+    @tailrec
+    def go(acc: Grid): Grid =
+      if (isComplete(acc)) acc
+      else {
+        val lastFilled = Coord.coordsOfLastCellFilled(acc)
+        lastFilled match {
+          case None => acc
+          case Some(last) =>
+            val cellValue = acc.rows(last.row)(last.col)
+            if (cellValue.value == 9) {
+              acc.rows(last.row)(last.col) = Empty
+              val n = Grid(acc.rows)
+              go(n)
+            } else {
+              acc.rows(last.row)(last.col) = Deduced(
+                acc.rows(last.row)(last.col).value + 1
+              )
+              if (isValid(acc)) acc
+              else go(acc)
+            }
+        }
+      }
+
+    go(g)
   }
 
-  def colValues(g: Grid, colIndex: Int): Seq[Int] = {
+  def rowsValid(g: Grid): Boolean = g.rows.forall { row =>
+    val knownValues = row.filterNot(_ == Empty)
+    knownValues.map(_.value).distinct.length == knownValues.length
+  }
+
+  def colValues(g: Grid, colIndex: Int): Seq[Cell] = {
     val x = g.rows.map { row =>
       row(colIndex)
     }
@@ -50,16 +83,111 @@ object Sudoku extends App {
 
   def colsValid(g: Grid): Boolean =
     g.rows.indices forall { colIndex =>
-      val values = colValues(g, colIndex).filter(_ > 0)
-      values.distinct.length == values.length
+      val values = colValues(g, colIndex).filterNot(_ == Empty)
+      values.map(_.value).distinct.length == values.length
     }
 
   def boxCoords(g: Grid): Seq[Seq[Coord]] =
     Seq(
-      Seq(Coord(0, 0), Coord(0, 1), Coord(1, 0), Coord(1, 1)),
-      Seq(Coord(0, 2), Coord(0, 3), Coord(1, 2), Coord(1, 3)),
-      Seq(Coord(2, 0), Coord(2, 1), Coord(3, 0), Coord(3, 1)),
-      Seq(Coord(2, 2), Coord(2, 3), Coord(3, 2), Coord(3, 3))
+      Seq(
+        Coord(0, 0),
+        Coord(0, 1),
+        Coord(0, 2),
+        Coord(1, 0),
+        Coord(1, 1),
+        Coord(1, 2),
+        Coord(2, 0),
+        Coord(2, 1),
+        Coord(2, 2)
+      ),
+      Seq(
+        Coord(0, 3),
+        Coord(0, 4),
+        Coord(0, 5),
+        Coord(1, 3),
+        Coord(1, 4),
+        Coord(1, 5),
+        Coord(2, 3),
+        Coord(2, 4),
+        Coord(2, 5)
+      ),
+      Seq(
+        Coord(0, 6),
+        Coord(0, 7),
+        Coord(0, 8),
+        Coord(1, 6),
+        Coord(1, 7),
+        Coord(1, 8),
+        Coord(2, 6),
+        Coord(2, 7),
+        Coord(2, 8)
+      ),
+      Seq(
+        Coord(3, 0),
+        Coord(3, 1),
+        Coord(3, 2),
+        Coord(4, 0),
+        Coord(4, 1),
+        Coord(4, 2),
+        Coord(5, 0),
+        Coord(5, 1),
+        Coord(5, 2)
+      ),
+      Seq(
+        Coord(3, 3),
+        Coord(3, 4),
+        Coord(3, 5),
+        Coord(4, 3),
+        Coord(4, 4),
+        Coord(4, 5),
+        Coord(5, 3),
+        Coord(5, 4),
+        Coord(5, 5)
+      ),
+      Seq(
+        Coord(3, 6),
+        Coord(3, 7),
+        Coord(3, 8),
+        Coord(4, 6),
+        Coord(4, 7),
+        Coord(4, 8),
+        Coord(5, 6),
+        Coord(5, 7),
+        Coord(5, 8)
+      ),
+      Seq(
+        Coord(6, 0),
+        Coord(6, 1),
+        Coord(6, 2),
+        Coord(7, 0),
+        Coord(7, 1),
+        Coord(7, 2),
+        Coord(8, 0),
+        Coord(8, 1),
+        Coord(8, 2)
+      ),
+      Seq(
+        Coord(6, 3),
+        Coord(6, 4),
+        Coord(6, 5),
+        Coord(7, 3),
+        Coord(7, 4),
+        Coord(7, 5),
+        Coord(8, 3),
+        Coord(8, 4),
+        Coord(8, 5)
+      ),
+      Seq(
+        Coord(6, 6),
+        Coord(6, 7),
+        Coord(6, 8),
+        Coord(7, 6),
+        Coord(7, 7),
+        Coord(7, 8),
+        Coord(8, 6),
+        Coord(8, 7),
+        Coord(8, 8)
+      )
     )
 
   def boxesValid(g: Grid): Boolean = boxCoords(g).forall { box =>
@@ -67,25 +195,31 @@ object Sudoku extends App {
       .map { b =>
         g.rows(b.row)(b.col)
       }
-      .filter(_ > 0)
-    values.distinct.length == values.length
+      .filterNot(_ == Empty)
+    values.map(_.value).distinct.length == values.length
   }
 
   def isValid(g: Grid): Boolean =
     rowsValid(g) && colsValid(g) && boxesValid(g)
 
   def isComplete(g: Grid): Boolean =
-    !g.rows(0).contains(0) &&
-      !g.rows(1).contains(0) &&
-      !g.rows(2).contains(0) &&
-      !g.rows(3).contains(0)
+    !g.rows(0).contains(Empty) &&
+      !g.rows(1).contains(Empty) &&
+      !g.rows(2).contains(Empty) &&
+      !g.rows(3).contains(Empty) &&
+      !g.rows(4).contains(Empty) &&
+      !g.rows(5).contains(Empty) &&
+      !g.rows(6).contains(Empty) &&
+      !g.rows(7).contains(Empty) &&
+      !g.rows(8).contains(Empty) &&
+      isValid(g)
 
   val initGrid = Grid(
     Array(
-      Array(1, 2, 3, 4),
-      Array(4, 3, 2, 1),
-      Array(3, 4, 1, 2),
-      Array(2, 1, 0, 0)
+      Array(Given(1), Given(2), Given(3), Given(4)),
+      Array(Given(4), Given(3), Given(2), Given(1)),
+      Array(Given(3), Given(4), Given(1), Given(2)),
+      Array(Given(2), Given(1), Empty, Empty)
     )
   )
 
@@ -93,7 +227,7 @@ object Sudoku extends App {
 
   var count = 0
 
-  def printGrid(g: Grid): Unit = {
+  def printGrid(g: Grid): Unit =
     g.rows.foreach { row =>
       row.foreach { cell =>
         print(cell)
@@ -101,20 +235,29 @@ object Sudoku extends App {
       }
       println()
     }
-  }
 
-  println("start")
-  printGrid(grid)
-  while (!isComplete(grid) && count < 10) {
-    grid = nextCellFilled(grid)
-    var count2 = 0
-    while (!isValid(grid) && count2 < 10) {
-      grid = incremented(grid)
-      count2 = count2 + 1
-    }
-    count = count + 1
+  def show(g: Grid): String =
+    g.rows.map { row =>
+      val x = row.map { cell =>
+        s"${cell.value} "
+      }.mkString
+      s"$x\n"
+    }.mkString
+
+  def solved(g: Grid): Grid = {
+    @tailrec
+    def go(acc: Grid, numSteps: Int): Grid =
+      if (isComplete(acc) || numSteps == 200) {
+        println(numSteps)
+        acc
+      } else {
+        val n = nextCellFilled(acc)
+        if (isValid(n)) go(n, numSteps + 1)
+        else {
+          val i = incremented(n)
+          go(i, numSteps + 1)
+        }
+      }
+    go(g, 0)
   }
-  println()
-  println("end")
-  printGrid(grid)
 }
