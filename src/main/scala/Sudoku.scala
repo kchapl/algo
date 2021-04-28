@@ -214,32 +214,11 @@ object Sudoku extends App {
       !g.rows(8).contains(Empty) &&
       isValid(g)
 
-  val initGrid = Grid(
-    Array(
-      Array(Given(1), Given(2), Given(3), Given(4)),
-      Array(Given(4), Given(3), Given(2), Given(1)),
-      Array(Given(3), Given(4), Given(1), Given(2)),
-      Array(Given(2), Given(1), Empty, Empty)
-    )
-  )
-
-  var grid = initGrid
-
-  var count = 0
-
-  def printGrid(g: Grid): Unit =
-    g.rows.foreach { row =>
-      row.foreach { cell =>
-        print(cell)
-        print(" ")
-      }
-      println()
-    }
-
   def show(g: Grid): String =
     g.rows.map { row =>
-      val x = row.map { cell =>
-        s"${cell.value} "
+      val x = row.map {
+        case Empty => "- "
+        case cell  => s"${cell.value} "
       }.mkString
       s"$x\n"
     }.mkString
@@ -247,7 +226,7 @@ object Sudoku extends App {
   def solved(g: Grid): Grid = {
     @tailrec
     def go(acc: Grid, numSteps: Int): Grid =
-      if (isComplete(acc) || numSteps == 200) {
+      if (isComplete(acc) || numSteps == 20000) {
         println(numSteps)
         acc
       } else {
