@@ -1,6 +1,6 @@
 package algo
 
-import Sudoku.{Cell, Coord, Empty, Given, Grid, show}
+import Sudoku._
 
 import scala.io.StdIn.readLine
 
@@ -23,5 +23,7 @@ object Main extends App {
   } yield coordinateValue(Coord(row, col))
 
   val w = Grid(y)
+  println()
   println(show(w))
+  println(show(solved(w)))
 }
