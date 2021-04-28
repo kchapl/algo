@@ -7,7 +7,7 @@ import utest._
 object SodukoTestSuite extends TestSuite {
 
   private val problem = Grid(
-    Array(
+    Seq(
       Array(
         Given(1),
         Empty,
@@ -125,7 +125,7 @@ object SodukoTestSuite extends TestSuite {
     }
     test("solved") {
       val solution = Grid(
-        Array(
+        Seq(
           Array(
             Given(1),
             Deduced(8),

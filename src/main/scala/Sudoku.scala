@@ -33,7 +33,7 @@ object Sudoku extends App {
     }
   }
 
-  case class Grid(rows: Array[Array[Cell]])
+  case class Grid(rows: Seq[Array[Cell]])
 
   def nextCellFilled(g: Grid): Grid = {
     val c = Coord.coordsOfNextCellToFill(g)
@@ -203,16 +203,7 @@ object Sudoku extends App {
     rowsValid(g) && colsValid(g) && boxesValid(g)
 
   def isComplete(g: Grid): Boolean =
-    !g.rows(0).contains(Empty) &&
-      !g.rows(1).contains(Empty) &&
-      !g.rows(2).contains(Empty) &&
-      !g.rows(3).contains(Empty) &&
-      !g.rows(4).contains(Empty) &&
-      !g.rows(5).contains(Empty) &&
-      !g.rows(6).contains(Empty) &&
-      !g.rows(7).contains(Empty) &&
-      !g.rows(8).contains(Empty) &&
-      isValid(g)
+    (0 to 8).forall(i => !g.rows(i).contains(Empty)) && isValid(g)
 
   def show(g: Grid): String =
     g.rows.map { row =>
