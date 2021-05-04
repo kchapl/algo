@@ -90,9 +90,9 @@ object Sudoku extends App {
           case None => acc
           case Some(last) =>
             val cellValue = acc.rows(last.row)(last.col)
-            if (cellValue.value == 9) {
+            if (cellValue.value == 9)
               go(updated(acc, last, Empty))
-            } else {
+            else {
               val x = updated(
                 acc,
                 last,
@@ -107,9 +107,11 @@ object Sudoku extends App {
     go(g)
   }
 
+  def allUnique(cells: Seq[Cell]): Boolean =
+    cells.map(_.value).distinct.length == cells.length
+
   def rowsValid(g: Grid): Boolean = g.rows.forall { row =>
-    val knownValues = row.filterNot(_ == Empty)
-    knownValues.map(_.value).distinct.length == knownValues.length
+    allUnique(row.filterNot(_ == Empty))
   }
 
   def colValues(g: Grid, colIndex: Int): Seq[Cell] =
@@ -118,16 +120,14 @@ object Sudoku extends App {
   def colsValid(g: Grid): Boolean =
     g.rows.indices forall { colIndex =>
       val values = colValues(g, colIndex).filterNot(_ == Empty)
-      values.map(_.value).distinct.length == values.length
+      allUnique(values)
     }
 
   def boxesValid(g: Grid): Boolean = boxCoords.forall { box =>
     val values = box
-      .map { b =>
-        g.rows(b.row)(b.col)
-      }
+      .map(b => g.rows(b.row)(b.col))
       .filterNot(_ == Empty)
-    values.map(_.value).distinct.length == values.length
+    allUnique(values)
   }
 
   def isValid(g: Grid): Boolean =
@@ -154,10 +154,8 @@ object Sudoku extends App {
       } else {
         val n = nextCellFilled(acc)
         if (isValid(n)) go(n, numSteps + 1)
-        else {
-          val i = incremented(n)
-          go(i, numSteps + 1)
-        }
+        else
+          go(incremented(n), numSteps + 1)
       }
     go(g, 0)
   }
