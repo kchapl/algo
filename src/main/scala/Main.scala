@@ -17,9 +17,9 @@ object Main extends App {
   }
 
   val y = for {
-    row <- (0 to 8).toArray
+    row <- 0 to 8
   } yield for {
-    col <- (0 to 8).toArray
+    col <- 0 to 8
   } yield coordinateValue(Coord(row, col))
 
   val w = Grid(y)

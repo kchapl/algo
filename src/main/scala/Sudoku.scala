@@ -68,14 +68,16 @@ object Sudoku extends App {
     }
   }
 
-  case class Grid(rows: Seq[Array[Cell]])
+  case class Grid(rows: Seq[Seq[Cell]])
 
-  def nextCellFilled(g: Grid): Grid = {
+  def nextCellFilled(g: Grid): Grid =
     Coord
       .coordsOfNextCellToFill(g)
-      .foreach(d => g.rows(d.row)(d.col) = Deduced(1))
-    g
-  }
+      .map(d => updated(g, d, Deduced(1)))
+      .getOrElse(g)
+
+  def updated(g: Grid, c: Coord, value: Cell): Grid =
+    Grid(g.rows.updated(c.row, g.rows(c.row).updated(c.col, value)))
 
   def incremented(g: Grid): Grid = {
 
@@ -89,15 +91,15 @@ object Sudoku extends App {
           case Some(last) =>
             val cellValue = acc.rows(last.row)(last.col)
             if (cellValue.value == 9) {
-              acc.rows(last.row)(last.col) = Empty
-              val n = Grid(acc.rows)
-              go(n)
+              go(updated(acc, last, Empty))
             } else {
-              acc.rows(last.row)(last.col) = Deduced(
-                acc.rows(last.row)(last.col).value + 1
+              val x = updated(
+                acc,
+                last,
+                Deduced(acc.rows(last.row)(last.col).value + 1)
               )
-              if (isValid(acc)) acc
-              else go(acc)
+              if (isValid(x)) x
+              else go(x)
             }
         }
       }
@@ -110,12 +112,8 @@ object Sudoku extends App {
     knownValues.map(_.value).distinct.length == knownValues.length
   }
 
-  def colValues(g: Grid, colIndex: Int): Seq[Cell] = {
-    val x = g.rows.map { row =>
-      row(colIndex)
-    }
-    x
-  }
+  def colValues(g: Grid, colIndex: Int): Seq[Cell] =
+    g.rows.map(_(colIndex))
 
   def colsValid(g: Grid): Boolean =
     g.rows.indices forall { colIndex =>
