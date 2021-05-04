@@ -1,5 +1,7 @@
 package algo
 
+import Sudoku.Coord.boxCoords
+
 import scala.annotation.tailrec
 
 object Sudoku extends App {
@@ -13,31 +15,65 @@ object Sudoku extends App {
 
   object Coord {
 
+    val boxCoords: Seq[Seq[Coord]] =
+      Seq(
+        for {
+          x <- 0 to 2
+          y <- 0 to 2
+        } yield Coord(x, y),
+        for {
+          x <- 0 to 2
+          y <- 3 to 5
+        } yield Coord(x, y),
+        for {
+          x <- 0 to 2
+          y <- 6 to 8
+        } yield Coord(x, y),
+        for {
+          x <- 3 to 5
+          y <- 0 to 2
+        } yield Coord(x, y),
+        for {
+          x <- 3 to 5
+          y <- 3 to 5
+        } yield Coord(x, y),
+        for {
+          x <- 3 to 5
+          y <- 6 to 8
+        } yield Coord(x, y),
+        for {
+          x <- 6 to 8
+          y <- 0 to 2
+        } yield Coord(x, y),
+        for {
+          x <- 6 to 8
+          y <- 3 to 5
+        } yield Coord(x, y),
+        for {
+          x <- 6 to 8
+          y <- 6 to 8
+        } yield Coord(x, y)
+      )
+
     def coordsOfNextCellToFill(g: Grid): Option[Coord] = {
-      val row = g.rows.indexWhere(row => row.contains(Empty))
+      val row = g.rows.indexWhere(_.contains(Empty))
       if (row == -1) None
-      else {
-        val h = g.rows(row).indexWhere(_ == Empty)
-        Some(Coord(row, h))
-      }
+      else Some(Coord(row, g.rows(row).indexWhere(_ == Empty)))
     }
 
     def coordsOfLastCellFilled(g: Grid): Option[Coord] = {
-      val row =
-        g.rows.lastIndexWhere(row => row.exists(c => c.isInstanceOf[Deduced]))
+      val row = g.rows.lastIndexWhere(_.exists(_.isInstanceOf[Deduced]))
       if (row == -1) None
-      else {
-        val h = g.rows(row).lastIndexWhere(c => c.isInstanceOf[Deduced])
-        Some(Coord(row, h))
-      }
+      else Some(Coord(row, g.rows(row).lastIndexWhere(_.isInstanceOf[Deduced])))
     }
   }
 
   case class Grid(rows: Seq[Array[Cell]])
 
   def nextCellFilled(g: Grid): Grid = {
-    val c = Coord.coordsOfNextCellToFill(g)
-    c.foreach(d => g.rows(d.row)(d.col) = Deduced(1))
+    Coord
+      .coordsOfNextCellToFill(g)
+      .foreach(d => g.rows(d.row)(d.col) = Deduced(1))
     g
   }
 
@@ -87,110 +123,7 @@ object Sudoku extends App {
       values.map(_.value).distinct.length == values.length
     }
 
-  def boxCoords(g: Grid): Seq[Seq[Coord]] =
-    Seq(
-      Seq(
-        Coord(0, 0),
-        Coord(0, 1),
-        Coord(0, 2),
-        Coord(1, 0),
-        Coord(1, 1),
-        Coord(1, 2),
-        Coord(2, 0),
-        Coord(2, 1),
-        Coord(2, 2)
-      ),
-      Seq(
-        Coord(0, 3),
-        Coord(0, 4),
-        Coord(0, 5),
-        Coord(1, 3),
-        Coord(1, 4),
-        Coord(1, 5),
-        Coord(2, 3),
-        Coord(2, 4),
-        Coord(2, 5)
-      ),
-      Seq(
-        Coord(0, 6),
-        Coord(0, 7),
-        Coord(0, 8),
-        Coord(1, 6),
-        Coord(1, 7),
-        Coord(1, 8),
-        Coord(2, 6),
-        Coord(2, 7),
-        Coord(2, 8)
-      ),
-      Seq(
-        Coord(3, 0),
-        Coord(3, 1),
-        Coord(3, 2),
-        Coord(4, 0),
-        Coord(4, 1),
-        Coord(4, 2),
-        Coord(5, 0),
-        Coord(5, 1),
-        Coord(5, 2)
-      ),
-      Seq(
-        Coord(3, 3),
-        Coord(3, 4),
-        Coord(3, 5),
-        Coord(4, 3),
-        Coord(4, 4),
-        Coord(4, 5),
-        Coord(5, 3),
-        Coord(5, 4),
-        Coord(5, 5)
-      ),
-      Seq(
-        Coord(3, 6),
-        Coord(3, 7),
-        Coord(3, 8),
-        Coord(4, 6),
-        Coord(4, 7),
-        Coord(4, 8),
-        Coord(5, 6),
-        Coord(5, 7),
-        Coord(5, 8)
-      ),
-      Seq(
-        Coord(6, 0),
-        Coord(6, 1),
-        Coord(6, 2),
-        Coord(7, 0),
-        Coord(7, 1),
-        Coord(7, 2),
-        Coord(8, 0),
-        Coord(8, 1),
-        Coord(8, 2)
-      ),
-      Seq(
-        Coord(6, 3),
-        Coord(6, 4),
-        Coord(6, 5),
-        Coord(7, 3),
-        Coord(7, 4),
-        Coord(7, 5),
-        Coord(8, 3),
-        Coord(8, 4),
-        Coord(8, 5)
-      ),
-      Seq(
-        Coord(6, 6),
-        Coord(6, 7),
-        Coord(6, 8),
-        Coord(7, 6),
-        Coord(7, 7),
-        Coord(7, 8),
-        Coord(8, 6),
-        Coord(8, 7),
-        Coord(8, 8)
-      )
-    )
-
-  def boxesValid(g: Grid): Boolean = boxCoords(g).forall { box =>
+  def boxesValid(g: Grid): Boolean = boxCoords.forall { box =>
     val values = box
       .map { b =>
         g.rows(b.row)(b.col)
