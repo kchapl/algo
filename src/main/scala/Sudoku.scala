@@ -15,45 +15,16 @@ object Sudoku extends App {
 
   object Coord {
 
-    val boxCoords: Seq[Seq[Coord]] =
-      Seq(
-        for {
-          x <- 0 to 2
-          y <- 0 to 2
-        } yield Coord(x, y),
-        for {
-          x <- 0 to 2
-          y <- 3 to 5
-        } yield Coord(x, y),
-        for {
-          x <- 0 to 2
-          y <- 6 to 8
-        } yield Coord(x, y),
-        for {
-          x <- 3 to 5
-          y <- 0 to 2
-        } yield Coord(x, y),
-        for {
-          x <- 3 to 5
-          y <- 3 to 5
-        } yield Coord(x, y),
-        for {
-          x <- 3 to 5
-          y <- 6 to 8
-        } yield Coord(x, y),
-        for {
-          x <- 6 to 8
-          y <- 0 to 2
-        } yield Coord(x, y),
-        for {
-          x <- 6 to 8
-          y <- 3 to 5
-        } yield Coord(x, y),
-        for {
-          x <- 6 to 8
-          y <- 6 to 8
-        } yield Coord(x, y)
-      )
+    val boxCoords: Seq[Seq[Coord]] = {
+      val coords = (0 to 8).sliding(3, 3).toSeq
+      for {
+        rowCoords <- coords
+        colCoords <- coords
+      } yield for {
+        x <- rowCoords
+        y <- colCoords
+      } yield Coord(x, y)
+    }
 
     def coordsOfNextCellToFill(g: Grid): Option[Coord] = {
       val row = g.rows.indexWhere(_.contains(Empty))
