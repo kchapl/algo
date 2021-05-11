@@ -1,6 +1,7 @@
 package algo
 
 import Sudoku._
+import sudoku.Grid
 
 import scala.io.StdIn.readLine
 
@@ -24,6 +25,6 @@ object Main extends App {
 
   val w = Grid(y)
   println()
-  println(show(w))
-  println(show(solved(w)))
+  println(w.show)
+  println(solved(w).show)
 }

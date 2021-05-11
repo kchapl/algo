@@ -1,6 +1,7 @@
 package algo
 
-import Sudoku.{Deduced, Empty, Given, Grid, show}
+import Sudoku.{Deduced, Empty, Given}
+import sudoku.Grid
 
 import utest._
 
@@ -112,7 +113,7 @@ object SodukoTestSuite extends TestSuite {
 
   val tests: Tests = Tests {
     test("show") {
-      show(problem) ==> """1 - 5 3 - - 7 - 4 
+      problem.show ==> """1 - 5 3 - - 7 - 4 
                           |- - 4 8 5 - 6 - - 
                           |9 2 - - - - 8 - - 
                           |- - - - - 4 - - 1 
@@ -227,7 +228,7 @@ object SodukoTestSuite extends TestSuite {
           )
         )
       )
-      show(Sudoku.solved(problem)) ==> show(solution)
+      Sudoku.solved(problem).show ==> solution.show
     }
   }
 }
