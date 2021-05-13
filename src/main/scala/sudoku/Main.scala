@@ -1,7 +1,5 @@
 package algo
-
-import Sudoku._
-import sudoku.Grid
+package sudoku
 
 import scala.io.StdIn.readLine
 
@@ -17,14 +15,14 @@ object Main extends App {
     }
   }
 
-  val y = for {
-    row <- 0 to 8
+  val rows = for {
+    row <- 0 until Grid.size
   } yield for {
-    col <- 0 to 8
+    col <- 0 until Grid.size
   } yield coordinateValue(Coord(row, col))
 
-  val w = Grid(y)
+  val grid = Grid(rows)
   println()
-  println(w.show)
-  println(solved(w).show)
+  println(grid.show)
+  println(grid.solved.show)
 }

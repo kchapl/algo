@@ -1,11 +1,10 @@
 package algo
 
-import Sudoku.{Deduced, Empty, Given}
-import sudoku.Grid
+import sudoku.{Deduced, Empty, Given, Grid}
 
 import utest._
 
-object SodukoTestSuite extends TestSuite {
+object GridTestSuite extends TestSuite {
 
   private val problem = Grid(
     Seq(
@@ -228,7 +227,7 @@ object SodukoTestSuite extends TestSuite {
           )
         )
       )
-      Sudoku.solved(problem).show ==> solution.show
+      problem.solved.show ==> solution.show
     }
   }
 }
