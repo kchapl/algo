@@ -2,7 +2,7 @@ name := "algo"
 
 scalaVersion := "2.13.5"
 
-idePackagePrefix := Some("algo")
+scalacOptions += "-deprecation"
 
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.7.9" % "test"
 
