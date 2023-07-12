@@ -2,8 +2,8 @@ name := "algo"
 
 scalaVersion := "2.13.11"
 
-idePackagePrefix := Some("algo")
+scalacOptions += "-deprecation"
 
-libraryDependencies += "com.lihaoyi" %% "utest" % "0.7.11" % "test"
+libraryDependencies += "com.lihaoyi" %% "utest" % "0.7.11" % Test
 
 testFrameworks += new TestFramework("utest.runner.Framework")
