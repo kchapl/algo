@@ -1,6 +1,6 @@
 name := "algo"
 
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.11"
 
 idePackagePrefix := Some("algo")
 
