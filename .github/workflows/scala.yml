@@ -15,8 +15,8 @@ jobs:
     steps:
     
     - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-        with:
-          config: ${{ vars.PERMISSIONS_CONFIG }}
+      with:
+        config: ${{ vars.PERMISSIONS_CONFIG }}
           
     - uses: actions/checkout@v3
     - uses: actions/setup-java@v3
