@@ -34,9 +34,7 @@ case class Grid(rows: Seq[Seq[Cell]]) {
     rows.map(_(colIndex))
 
   lazy val isValid: Boolean = {
-    val rowsValid: Boolean = rows forall { row =>
-      allUnique(row.filterNot(_ == Empty))
-    }
+    val rowsValid: Boolean = rows forall { row => allUnique(row.filterNot(_ == Empty)) }
     val colsValid: Boolean =
       rows.indices forall { colIndex =>
         val values = colValues(colIndex).filterNot(_ == Empty)
