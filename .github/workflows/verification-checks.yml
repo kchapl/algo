@@ -1,0 +1,17 @@
+name: Verification Checks
+
+on:
+  pull_request:
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Write warning message to summary
+        run: |
+          echo "::warning::This is a warning message." >> $GITHUB_STEP_SUMMARY
+
+      - name: Output warning message
+        run: |
+          cat $GITHUB_STEP_SUMMARY
