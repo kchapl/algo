@@ -1,6 +1,6 @@
 name := "algo"
 
-scalaVersion := "2.13.13"
+scalaVersion := "2.13.14"
 
 scalacOptions += "-deprecation"
 
